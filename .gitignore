@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+venv/
+yolov8n.pt
+*.log
+*.mp4
+.DS_Store
