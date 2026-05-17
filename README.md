@@ -163,7 +163,27 @@ SmartVeil-AI/
 ## Screenshots
 
 <p align="center">
-  <i>Grid view with 11 cameras, motion detection active (red boxes), object detection active (colored boxes with labels).</i>
+  <img src="screenshots/grid_view.png" width="800" alt="Grid view with 11 cameras">
+  <br>
+  <em>Live grid view with 11 cameras</em>
+</p>
+
+<p align="center">
+  <img src="screenshots/ai_detection.png" width="800" alt="AI object detection with YOLO">
+  <br>
+  <em>AI object detection — people (red), vehicles (blue), objects (green) with confidence labels</em>
+</p>
+
+<p align="center">
+  <img src="screenshots/motion_detection.png" width="800" alt="Motion detection">
+  <br>
+  <em>Motion detection — red boxes on moving regions</em>
+</p>
+
+<p align="center">
+  <img src="screenshots/settings.png" width="800" alt="Settings dialog">
+  <br>
+  <em>Settings with network discovery, camera management, and general configuration</em>
 </p>
 
 ## Troubleshooting
