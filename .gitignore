@@ -5,3 +5,4 @@ yolov8n.pt
 *.log
 *.mp4
 .DS_Store
+a9-v720/
