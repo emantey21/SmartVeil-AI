@@ -1,6 +1,7 @@
 import configparser
 import os
 import threading
+import time
 from pathlib import Path
 
 from PySide6.QtCore import Qt, QTimer
@@ -288,38 +289,45 @@ class SettingsDialog(QDialog):
 
     def _check_all_status(self):
         self.check_all_btn.setEnabled(False)
-        self.status_info.setText("Checking...")
+        self.status_info.setText("Preparing...")
         items = [self.discovery_list.item(i) for i in range(self.discovery_list.count())]
+        total = len(items)
+
+        from app.discovery import quality_label
 
         def check():
             online = 0
             offline = 0
-            for item in items:
+            for idx, item in enumerate(items):
                 url = item.data(Qt.ItemDataRole.UserRole)
-                status = self._probe_camera(url)
-                from app.discovery import quality_label
-                qlabel = quality_label(url)
                 ip = url.split("://")[1].split(":")[0]
+                qlabel = quality_label(url)
+                self.status_info.setText(f"Checking {idx+1}/{total}: {ip} [{qlabel}]...")
+                time.sleep(0.3)
+                status = self._probe_camera(url)
                 item.setText(f"{'🟢 online' if status else '🔴 offline'}  [{qlabel}] {ip}  —  {url}")
                 item.setData(Qt.ItemDataRole.UserRole + 1, "online" if status else "offline")
                 if status:
                     online += 1
                 else:
                     offline += 1
-            self.status_info.setText(f"{online} online, {offline} offline")
+                self.status_info.setText(f"{online} online, {offline} offline ({idx+1}/{total})")
+            self.status_info.setText(f"Done: {online} online, {offline} offline")
             self.check_all_btn.setEnabled(True)
 
         threading.Thread(target=check, daemon=True).start()
 
     def _probe_camera(self, url: str) -> bool:
         try:
-            import cv2
-            cap = cv2.VideoCapture(url, cv2.CAP_FFMPEG)
-            cap.set(cv2.CAP_PROP_OPEN_TIMEOUT_MSEC, 2000)
-            cap.set(cv2.CAP_PROP_READ_TIMEOUT_MSEC, 2000)
-            ret, frame = cap.read()
-            cap.release()
-            return ret
+            from urllib.parse import urlparse
+            parsed = urlparse(url)
+            import socket
+            s = socket.create_connection((parsed.hostname, parsed.port or 554), timeout=3)
+            req = f"OPTIONS {url} RTSP/1.0\r\nCSeq: 1\r\n\r\n"
+            s.sendall(req.encode())
+            resp = s.recv(1024).decode("utf-8", errors="ignore")
+            s.close()
+            return "200 OK" in resp
         except Exception:
             return False
 
